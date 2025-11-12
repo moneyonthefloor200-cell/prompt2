@@ -11,6 +11,7 @@ import { HistoryPanel } from '@/components/HistoryPanel';
 import { CustomTemplatesPanel } from '@/components/CustomTemplatesPanel';
 import { NavigationBar } from '@/components/NavigationBar';
 import { KeyboardShortcutsPanel } from '@/components/KeyboardShortcutsPanel';
+import { WhisperVoiceRecorder } from '@/components/WhisperVoiceRecorder';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const TEMPLATES = {
@@ -207,6 +208,14 @@ export default function Home() {
 
   const handleTemplateSelect = (value: string) => {
     setOriginalPrompt(TEMPLATES[value as keyof typeof TEMPLATES]);
+  };
+
+  const handleVoiceTranscript = (transcript: string) => {
+    // Whisper returns complete transcription, so we add it to existing text
+    setOriginalPrompt(prev => {
+      const separator = prev.trim() ? ' ' : '';
+      return prev + separator + transcript;
+    });
   };
 
   const handleCustomTemplateSelect = (template: any) => {
@@ -413,36 +422,43 @@ export default function Home() {
           >
             <Card className="shadow-2xl shadow-violet-500/10 border-2 border-white/20 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2 text-2xl">
-                      <Zap className="w-6 h-6 text-violet-600 dark:text-violet-400" />
-                      <span>הפרומפט המקורי שלך</span>
-                    </CardTitle>
-                    <CardDescription className="mt-2">
-                      הכנס את הפרומפט או המשפט שברצונך לשפר
-                    </CardDescription>
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2 text-2xl">
+                        <Zap className="w-6 h-6 text-violet-600 dark:text-violet-400" />
+                        <span>הפרומפט המקורי שלך</span>
+                      </CardTitle>
+                      <CardDescription className="mt-2">
+                        הכנס את הפרומפט או המשפט שברצונך לשפר
+                      </CardDescription>
+                    </div>
+                    <Select onValueChange={handleTemplateSelect}>
+                      <SelectTrigger className="w-[200px] bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm">
+                        <FileText className="w-4 h-4 mr-2" />
+                        <SelectValue placeholder="תבניות מהירות" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="coding">💻 עזרה בקוד</SelectItem>
+                        <SelectItem value="writing">✍️ כתיבת תוכן</SelectItem>
+                        <SelectItem value="business">💼 עסקי</SelectItem>
+                        <SelectItem value="teaching">🎓 הוראה</SelectItem>
+                        <SelectItem value="creative">🎨 יצירתי</SelectItem>
+                        <SelectItem value="analysis">📊 ניתוח</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <Select onValueChange={handleTemplateSelect}>
-                    <SelectTrigger className="w-[200px] bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm">
-                      <FileText className="w-4 h-4 mr-2" />
-                      <SelectValue placeholder="תבניות מהירות" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="coding">💻 עזרה בקוד</SelectItem>
-                      <SelectItem value="writing">✍️ כתיבת תוכן</SelectItem>
-                      <SelectItem value="business">💼 עסקי</SelectItem>
-                      <SelectItem value="teaching">🎓 הוראה</SelectItem>
-                      <SelectItem value="creative">🎨 יצירתי</SelectItem>
-                      <SelectItem value="analysis">📊 ניתוח</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  
+                  {/* Whisper Voice Recorder */}
+                  <WhisperVoiceRecorder 
+                    onTranscript={handleVoiceTranscript}
+                  />
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="relative">
                   <Textarea
-                    placeholder="לדוגמה: כתוב לי מאמר על AI... (Ctrl+Enter לשליחה, Ctrl+K לניקוי)"
+                    placeholder="לדוגמה: כתוב לי מאמר על AI... (Ctrl+Enter לשליחה, Ctrl+K לניקוי, או השתמש בהקלטה קולית)"
                     value={originalPrompt}
                     onChange={(e) => setOriginalPrompt(e.target.value)}
                     onKeyDown={handleKeyDown}
@@ -480,7 +496,7 @@ export default function Home() {
                   <Button
                     onClick={handleEnhance}
                     disabled={loading || !originalPrompt.trim()}
-                    className="w-full mt-4 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-700 hover:via-purple-700 hover:to-indigo-700 shadow-lg shadow-violet-500/30 text-lg h-12"
+                    className="w-full mt-4 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-700 hover:via-purple-700 hover:to-indigo-700 shadow-lg shadow-violet-500/30 text-lg h-12 disabled:opacity-50"
                   >
                     {loading ? (
                       <>
