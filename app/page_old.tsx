@@ -290,31 +290,23 @@ export default function Home() {
       </div>
 
       {/* Navigation Bar */}
-      <NavigationBar 
-        onNavigate={handleNavigate} 
-        currentSection={currentSection}
-        historyCount={historyCount}
-        templatesCount={templatesCount}
-      />
+      <NavigationBar onNavigate={handleNavigate} currentSection={currentSection} />
 
       {/* History Panel */}
       <AnimatePresence>
-        {showHistory && <HistoryPanel onSelect={handleHistorySelect} />}
+        {showHistory && <HistoryPanel onSelect={handleHistorySelect} isOpen={showHistory} />}
       </AnimatePresence>
 
       {/* Templates Panel */}
       <AnimatePresence>
-        {showTemplates && <CustomTemplatesPanel onSelect={handleCustomTemplateSelect} />}
+        {showTemplates && <CustomTemplatesPanel onSelect={handleCustomTemplateSelect} isOpen={showTemplates} />}
       </AnimatePresence>
-
-      {/* Keyboard Shortcuts Panel */}
-      <KeyboardShortcutsPanel isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
 
       {/* Main Content */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="container mx-auto px-4 py-8 max-w-5xl relative z-10"
+        className="container mx-auto px-4 py-8 max-w-7xl lg:mr-72 relative z-10"
       >
         {/* Header */}
         <motion.div
@@ -346,45 +338,10 @@ export default function Home() {
           >
             שנה כל פרומפט לפרומפט מקצועי ומדויק באמצעות טכניקות Prompt Engineering מתקדמות
           </motion.p>
-          
-          {/* Stats Cards */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 max-w-3xl mx-auto"
-          >
-            {[
-              { icon: Sparkles, label: 'פרומפטים משופרים', value: stats.total, color: 'from-violet-500 to-purple-500' },
-              { icon: TrendingUp, label: 'שיפור ממוצע', value: `×${stats.avgImprovement}`, color: 'from-blue-500 to-cyan-500' },
-              { icon: BarChart3, label: 'היסטוריה', value: historyCount, color: 'from-indigo-500 to-violet-500' },
-              { icon: Layers, label: 'תבניות', value: templatesCount, color: 'from-purple-500 to-pink-500' },
-            ].map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.4 + index * 0.05 }}
-                whileHover={{ scale: 1.05, y: -2 }}
-              >
-                <Card className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border-2 border-white/20 dark:border-slate-700/50 shadow-lg">
-                  <CardContent className="p-3 text-center">
-                    <div className={`inline-flex p-2 rounded-lg bg-gradient-to-br ${stat.color} mb-2`}>
-                      <stat.icon className="w-4 h-4 text-white" />
-                    </div>
-                    <p className="text-2xl font-bold text-slate-900 dark:text-white">{stat.value}</p>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">{stat.label}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {/* Method Badges */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
             className="flex flex-wrap gap-2 justify-center"
           >
             {['CRISPE Framework', 'Chain-of-Thought', 'RISEN Method', 'Few-Shot Learning'].map((badge, index) => (
@@ -392,8 +349,8 @@ export default function Home() {
                 key={badge}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6 + index * 0.05 }}
-                whileHover={{ scale: 1.05, y: -2 }}
+                transition={{ delay: 0.4 + index * 0.1 }}
+                whileHover={{ scale: 1.1, y: -2 }}
               >
                 <Badge variant="secondary" className="text-sm px-3 py-1 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm">
                   {badge}
@@ -403,12 +360,12 @@ export default function Home() {
           </motion.div>
         </motion.div>
 
-        {/* Input Section - Single Column */}
-        <div className="space-y-6 mb-8">
-          {/* Input Card */}
+        {/* Main Content Grid */}
+        <div className="grid lg:grid-cols-2 gap-6 mb-8">
+          {/* Input Section */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <Card className="shadow-2xl shadow-violet-500/10 border-2 border-white/20 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
@@ -501,86 +458,57 @@ export default function Home() {
           </motion.div>
 
           {/* Output Section */}
-          <AnimatePresence>
-            {enhancedPrompt && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
-              >
-                <Card className="shadow-2xl shadow-indigo-500/10 border-2 border-violet-200 dark:border-violet-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
-                  <CardHeader>
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                      <div>
-                        <CardTitle className="flex items-center gap-2 text-xl md:text-2xl">
-                          <Target className="w-5 h-5 md:w-6 md:h-6 text-indigo-600 dark:text-indigo-400" />
-                          <span>הפרומפט המשופר</span>
-                        </CardTitle>
-                        <CardDescription className="mt-2">
-                          פרומפט מקצועי עם כל האלמנטים הנדרשים
-                        </CardDescription>
-                      </div>
-                      {originalPrompt && enhancedPrompt && (
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <Card className="shadow-2xl shadow-indigo-500/10 border-2 border-violet-200 dark:border-violet-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-2xl">
+                  <Target className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                  <span>הפרומפט המשופר</span>
+                </CardTitle>
+                <CardDescription className="mt-2">
+                  פרומפט מקצועי עם כל האלמנטים הנדרשים
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="relative">
+                  <Textarea
+                    value={enhancedPrompt}
+                    readOnly
+                    placeholder="הפרומפט המשופר יופיע כאן..."
+                    className="min-h-[350px] text-base resize-none bg-gradient-to-br from-violet-50/50 to-indigo-50/50 dark:from-violet-950/30 dark:to-indigo-950/30 backdrop-blur-sm border-2 border-violet-200 dark:border-violet-800"
+                    dir="auto"
+                  />
+                  {enhancedPrompt && (
+                    <>
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
                         <Button
+                          onClick={handleCopy}
                           variant="outline"
                           size="sm"
-                          onClick={() => setShowComparison(!showComparison)}
-                          className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm"
+                          className="absolute top-3 left-3 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm shadow-lg"
                         >
-                          <GitCompare className="w-4 h-4 mr-2" />
-                          {showComparison ? 'הסתר השוואה' : 'הצג השוואה'}
+                          {copied ? (
+                            <>
+                              <Check className="w-4 h-4 mr-1 text-green-600" />
+                              הועתק!
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-4 h-4 mr-1" />
+                              העתק
+                            </>
+                          )}
                         </Button>
-                      )}
-                    </div>
-                  </CardHeader>
-              <CardContent>
-                {/* Comparison Mode */}
-                {showComparison ? (
-                  <div className="grid md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">מקורי:</p>
-                      <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 min-h-[150px] text-sm" dir="auto">
-                        {originalPrompt}
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-violet-600 dark:text-violet-400 mb-2">משופר:</p>
-                      <div className="p-4 bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-950/30 dark:to-indigo-950/30 rounded-lg border border-violet-200 dark:border-violet-800 min-h-[150px] text-sm" dir="auto">
-                        {enhancedPrompt}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="relative mb-4">
-                    <div className="relative">
-                      <Textarea
-                        value={enhancedPrompt}
-                        readOnly
-                        className="min-h-[250px] md:min-h-[300px] text-base resize-none bg-gradient-to-br from-violet-50/50 to-indigo-50/50 dark:from-violet-950/30 dark:to-indigo-950/30 backdrop-blur-sm border-2 border-violet-200 dark:border-violet-800 cursor-text"
-                        dir="auto"
-                      />
-                    </div>
-                    {enhancedPrompt && (
-                    <>
-                      <Button
-                        onClick={handleCopy}
-                        variant="outline"
-                        size="sm"
-                        className="absolute top-3 left-3 z-10 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm shadow-lg hover:bg-white dark:hover:bg-slate-800 transition-colors"
-                      >
-                        {copied ? (
-                          <>
-                            <Check className="w-4 h-4 mr-1 text-green-600" />
-                            הועתק!
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-4 h-4 mr-1" />
-                            העתק
-                          </>
-                        )}
-                      </Button>
+                      </motion.div>
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -595,8 +523,7 @@ export default function Home() {
                       </motion.div>
                     </>
                   )}
-                  </div>
-                )}
+                </div>
                 
                 <AnimatePresence>
                   {explanation && (
@@ -625,8 +552,6 @@ export default function Home() {
               </CardContent>
             </Card>
           </motion.div>
-            )}
-          </AnimatePresence>
         </div>
 
         {/* Info Section */}
